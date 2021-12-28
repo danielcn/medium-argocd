@@ -1,0 +1,66 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  name: argocd-workflow
+  namespace: argocd
+  #labels:
+  #  workflows.argoproj.io/archive-strategy: "false"
+  #annotations:
+    #workflows.argoproj.io/description: |
+    #  This is a simple hello world example.
+    #  You can also run it in Python: https://couler-proj.github.io/couler/examples/#hello-world
+spec:
+  entrypoint: whalesay
+  templates:
+  - name: whalesay
+    container:
+      image: docker/whalesay:latest
+      command: [cowsay]
+      args: ["hello world"]
+    outputs:
+      parameters:
+        - name: hello-param
+          valueFrom:
+          path: /tmp/hello_world.txt
+      artifacts:
+      - name: hello-art
+        path: /tmp/hello_world.txt
+        globalName: my-global-art
+
+
+  # templates:
+  #   - name: main
+  #     dag:
+  #       tasks:
+  #         - name: generate-parameter
+  #           template: whalesay
+  #         - name: consume-parameter
+  #           template: print-message
+  #           dependencies:
+  #             - generate-parameter
+  #           arguments:
+  #             parameters:
+  #               - name: message
+  #                 value: "{{tasks.generate-parameter.outputs.parameters.hello-param}}"
+
+  #   - name: whalesay
+  #     container:
+  #       image: docker/whalesay
+  #       command: [ sh, -c ]
+  #       args: [ "echo -n hello world > /tmp/hello_world.txt" ]
+  #     outputs:
+  #       parameters:
+  #         - name: hello-param
+  #           valueFrom:
+  #             path: /tmp/hello_world.txt
+
+  #   - name: print-message
+  #     inputs:
+  #       parameters:
+  #         - name: message
+  #     container:
+  #       image: docker/whalesay
+  #       command: [ cowsay ]
+  #       args: [ "{{inputs.parameters.message}}" ]
+
+
